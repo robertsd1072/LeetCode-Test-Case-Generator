@@ -41,6 +41,85 @@ class LeetCodeTestCaseGenerator
         return rand.nextInt(max - min + 1) + min;
     }
 
+    private static void generateTestCase(String cmd_init, HashMap<String, CmdsStuff> hashmap_cmds
+                                        ,ArrayList<CmdsStuff> list_just_nums, ArrayList<String> other_cmds
+                                        ,int count)
+    {
+        String first_part = "[";
+        String second_part = "[";
+
+        Random rand = new Random();
+
+        String temp;
+
+        if (cmd_init.compareTo("") != 0)
+        {
+            first_part += cmd_init;
+
+            temp = hashmap_cmds.get(cmd_init).num_format;
+            for (int j=0; j<hashmap_cmds.get(cmd_init).num_name.length; j++)
+            {
+                int min = hashmap_cmds.get(cmd_init).range[j][0];
+                int max = hashmap_cmds.get(cmd_init).range[j][1];
+                int random_num = generateRandomInRange(rand, min, max);
+
+                temp = temp.replace(hashmap_cmds.get(cmd_init).num_name[j], random_num+"");
+            }
+
+            second_part += temp;
+
+            for (int i=0; i<count; i++)
+            {
+                int random_index = generateRandomInRange(rand, 0, other_cmds.size()-1);
+
+                first_part += ","+other_cmds.get(random_index);
+
+                temp = hashmap_cmds.get(other_cmds.get(random_index)).num_format;
+                for (int j=0; j<hashmap_cmds.get(other_cmds.get(random_index)).num_name.length; j++)
+                {
+                    int min = hashmap_cmds.get(other_cmds.get(random_index)).range[j][0];
+                    int max = hashmap_cmds.get(other_cmds.get(random_index)).range[j][1];
+                    int random_num = generateRandomInRange(rand, min, max);
+
+                    temp = temp.replace(hashmap_cmds.get(other_cmds.get(random_index)).num_name[j], random_num+"");
+                }
+
+                second_part += ","+temp;
+            }
+
+            first_part += "]";
+            System.out.println(first_part);
+        }
+        else
+        {
+            for (int i=0; i<count; i++)
+            {
+                int random_index = generateRandomInRange(rand, 0, list_just_nums.size()-1);
+
+                temp = list_just_nums.get(random_index).num_format;
+                for (int j=0; j<list_just_nums.get(random_index).num_name.length; j++)
+                {
+                    while (temp.contains(list_just_nums.get(random_index).num_name[j]))
+                    {
+                        int min = list_just_nums.get(random_index).range[j][0];
+                        int max = list_just_nums.get(random_index).range[j][1];
+                        int random_num = generateRandomInRange(rand, min, max);
+
+                        temp = temp.replaceFirst(list_just_nums.get(random_index).num_name[j], random_num+"");
+                    }
+                }
+
+                second_part += temp;
+
+                if (i < count-1)
+                    second_part += ",";
+            }
+        }
+
+        second_part += "]";
+        System.out.println(second_part);
+    }
+
     public static void main(String[] args)
     {
         Scanner scanner = new Scanner(System.in);
@@ -98,58 +177,49 @@ class LeetCodeTestCaseGenerator
                 other_cmds.add(cmd);
             }
         }
-        else {}
-
-        System.out.println("Input how many to generate.");
-        int count = Integer.parseInt(scanner.nextLine());
-
-        System.out.println("\nGenerating list...");
-
-        String first_part = "[";
-        String second_part = "[";
-
-        Random rand = new Random();
-
-        if (cmd_init.compareTo("") != 0)
+        else 
         {
-            first_part += cmd_init;
-
-            temp = hashmap_cmds.get(cmd_init).num_format;
-            for (int j=0; j<hashmap_cmds.get(cmd_init).num_name.length; j++)
+            while (true)
             {
-                int min = hashmap_cmds.get(cmd_init).range[j][0];
-                int max = hashmap_cmds.get(cmd_init).range[j][1];
-                int random_num = generateRandomInRange(rand, min, max);
+                System.out.println("\nInput format of objects in array, using letters in place of numbers (ex: \"[a,a]\"). Hit enter when done.");
 
-                temp = temp.replace(hashmap_cmds.get(cmd_init).num_name[j], random_num+"");
-            }
+                temp = scanner.nextLine();
+                if (temp.compareTo("") == 0)
+                    break;
 
-            second_part += temp;
+                String[] cmd_nums = temp.substring(temp.indexOf(":")+2, temp.length()-1).split(",");
+                String cmd_num_format = temp.substring(temp.indexOf(":")+1, temp.length());
 
-            for (int i=0; i<count; i++)
-            {
-                int random_index = generateRandomInRange(rand, 0, other_cmds.size()-1);
+                Integer[][] list_ranges = new Integer[cmd_nums.length][2];
 
-                first_part += ","+other_cmds.get(random_index);
-
-                temp = hashmap_cmds.get(other_cmds.get(random_index)).num_format;
-                for (int j=0; j<hashmap_cmds.get(other_cmds.get(random_index)).num_name.length; j++)
+                for (int i=0; i<cmd_nums.length; i++)
                 {
-                    int min = hashmap_cmds.get(other_cmds.get(random_index)).range[j][0];
-                    int max = hashmap_cmds.get(other_cmds.get(random_index)).range[j][1];
-                    int random_num = generateRandomInRange(rand, min, max);
-
-                    temp = temp.replace(hashmap_cmds.get(other_cmds.get(random_index)).num_name[j], random_num+"");
+                    System.out.println("Enter range of "+cmd_nums[i]+" (ex: \"(0,100]\")");
+                    temp = scanner.nextLine();
+                    list_ranges[i] = getRangeNum(temp);
                 }
 
-                second_part += ","+temp;
+                list_just_nums.add(new CmdsStuff(cmd_nums, cmd_num_format, list_ranges));
             }
         }
 
-        first_part += "]";
-        second_part += "]";
+        System.out.println("Input how many to generate (ex: 1000).");
+        int count = Integer.parseInt(scanner.nextLine());
 
-        System.out.println(first_part);
-        System.out.println(second_part);
+        System.out.println("If it needs to be sorted, type \"ASC\" or \"DESC\". Otherwise, hit enter.");
+        String sorted = scanner.nextLine();
+
+        generateTestCase(cmd_init, hashmap_cmds, list_just_nums, other_cmds, count);
+
+        while (true)
+        {
+            System.out.println("Hit enter to regenerate, or enter another amount (ex: 1000).");
+            String maybe_count = scanner.nextLine();
+            if (maybe_count.compareTo("") != 0)
+                count = Integer.parseInt(maybe_count);
+
+            System.out.println();
+            generateTestCase(cmd_init, hashmap_cmds, list_just_nums, other_cmds, count);
+        }
     }
 }
