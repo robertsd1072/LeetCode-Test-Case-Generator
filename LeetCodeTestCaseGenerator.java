@@ -51,8 +51,33 @@ class LeetCodeTestCaseGenerator
         Random rand = new Random();
 
         String temp;
+        
+        if (cmd_init.compareTo("matrix") == 0)
+        {
+            for (int i=0; i<count; i++)
+            {
+                int random_index = generateRandomInRange(rand, 0, list_just_nums.size()-1);
 
-        if (cmd_init.compareTo("") != 0)
+                temp = list_just_nums.get(random_index).num_format;
+                for (int j=0; j<list_just_nums.get(random_index).num_name.length; j++)
+                {
+                    while (temp.contains(list_just_nums.get(random_index).num_name[j]))
+                    {
+                        int min = list_just_nums.get(random_index).range[j][0];
+                        int max = list_just_nums.get(random_index).range[j][1];
+                        int random_num = generateRandomInRange(rand, min, max);
+
+                        temp = temp.replaceFirst(list_just_nums.get(random_index).num_name[j], random_num+"");
+                    }
+                }
+
+                second_part += temp;
+
+                if (i < count-1)
+                    second_part += ",";
+            }
+        }
+        else if (cmd_init.compareTo("") != 0)
         {
             first_part += cmd_init;
 
@@ -124,7 +149,7 @@ class LeetCodeTestCaseGenerator
     {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("Input init command (ex: \"LRUCache:[capacity]\") or hit enter if none.");
+        System.out.println("Input init command (ex: \"LRUCache:[capacity]\") or hit enter if none. If you wish a matrix to be generated, type \"matrix\".");
         String temp = scanner.nextLine();
 
         HashMap<String, CmdsStuff> hashmap_cmds = new HashMap<>();
@@ -132,8 +157,38 @@ class LeetCodeTestCaseGenerator
 
         String cmd_init = "";
         ArrayList<String> other_cmds = new ArrayList<>();
+        
+        int count = -1;
 
-        if (temp.compareTo("") != 0)
+        if (temp.compareTo("matrix") == 0)
+        {
+            cmd_init = "matrix";
+            
+            System.out.println("Input the size of the matrix (ex: \"20x100\").");
+            temp = scanner.nextLine();
+            
+            count = Integer.parseInt(temp.substring(temp.indexOf("x")+1, temp.length()));
+            
+            String[] cmd_nums = {"index"};
+            String cmd_num_format = "[";
+            int row_size = Integer.parseInt(temp.substring(0, temp.indexOf("x")));
+            for (int i=0; i<row_size; i++)
+            {
+                cmd_num_format += "index";
+                if (i < row_size-1)
+                    cmd_num_format += ",";
+            }
+            cmd_num_format += "]";
+            
+            System.out.println("Input range of values at each index (ex: \"(0,100]\").");
+            temp = scanner.nextLine();
+            
+            Integer[][] list_ranges = new Integer[1][2];
+            list_ranges[0] = getRangeNum(temp);
+            
+            list_just_nums.add(new CmdsStuff(cmd_nums, cmd_num_format, list_ranges));
+        }
+        else if (temp.compareTo("") != 0)
         {
             cmd_init = "\""+temp.substring(0, temp.indexOf(":"))+"\"";
 
@@ -203,17 +258,30 @@ class LeetCodeTestCaseGenerator
             }
         }
 
-        System.out.println("Input how many to generate (ex: 1000).");
-        int count = Integer.parseInt(scanner.nextLine());
-
-        System.out.println("If it needs to be sorted, type \"ASC\" or \"DESC\". Otherwise, hit enter.");
-        String sorted = scanner.nextLine();
+        String sorted;
+        
+        if (count == -1)
+        {
+            System.out.println("Input how many to generate (ex: 1000).");
+            count = Integer.parseInt(scanner.nextLine());
+            
+            if (cmd_init.compareTo("") == 0)
+            {
+                System.out.println("If it needs to be sorted, type \"ASC\" or \"DESC\". Otherwise, hit enter.");
+                sorted = scanner.nextLine();
+            }
+        }
 
         generateTestCase(cmd_init, hashmap_cmds, list_just_nums, other_cmds, count);
 
         while (true)
         {
-            System.out.println("Hit enter to regenerate, or enter another amount (ex: 1000).");
+            System.out.print("Hit enter to regenerate");
+            if (cmd_init.compareTo("matrix") != 0)
+                System.out.println(", or enter another amount (ex: 1000).");
+            else
+                System.out.println();
+                
             String maybe_count = scanner.nextLine();
             if (maybe_count.compareTo("") != 0)
                 count = Integer.parseInt(maybe_count);
