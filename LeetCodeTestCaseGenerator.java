@@ -1,6 +1,6 @@
 import java.util.*;
 
-class LeetCodeTestCaseGenerator
+class Main
 {
     private static class CmdsStuff
     {
@@ -188,7 +188,11 @@ class LeetCodeTestCaseGenerator
     {
         Scanner scanner = new Scanner(System.in);
 
-        System.out.println("Input init command (ex: \"LRUCache:[capacity]\") or hit enter if none. If you want a matrix to be generated, type \"matrix\". If you want a string to be generated, type \"string\".");
+        System.out.println("Input one of the following:");
+        System.out.println("    \"command\" if the testcase uses commands like \'get\' or \'set\'");
+        System.out.println("    \"matrix\" if the testcase uses a matrix");
+        System.out.println("    \"array\" if the testcase uses an array");
+        System.out.println("    \"string\" if the testcase uses a string");
         String temp = scanner.nextLine();
 
         HashMap<String, CmdsStuff> hashmap_cmds = new HashMap<>();
@@ -199,25 +203,44 @@ class LeetCodeTestCaseGenerator
         
         int count = -1;
 
-        if (temp.compareTo("matrix") == 0)
+        if (temp.compareTo("matrix") == 0 || temp.compareTo("array") == 0)
         {
             cmd_init = "matrix";
             
-            System.out.println("Input the size of the matrix (ex: \"20x100\").");
-            temp = scanner.nextLine();
-            
-            count = Integer.parseInt(temp.substring(temp.indexOf("x")+1, temp.length()));
+            if (temp.compareTo("matrix") == 0)
+            {
+                System.out.println("Input the size of the matrix (ex: \"20x100\").");
+                temp = scanner.nextLine();
+                
+                count = Integer.parseInt(temp.substring(temp.indexOf("x")+1, temp.length()));
+            }
+            else
+            {
+                System.out.println("Input the length of the array (ex: \"100\").");
+                temp = scanner.nextLine();
+                
+                count = Integer.parseInt(temp);
+            }
             
             String[] cmd_nums = {"index"};
-            String cmd_num_format = "[";
-            int row_size = Integer.parseInt(temp.substring(0, temp.indexOf("x")));
+            String cmd_num_format = "";
+            int row_size;
+            if (temp.compareTo("matrix") == 0)
+            {
+                cmd_num_format = "[";
+                row_size = Integer.parseInt(temp.substring(0, temp.indexOf("x")));
+            }
+            else
+                row_size = 1;
+                
             for (int i=0; i<row_size; i++)
             {
                 cmd_num_format += "index";
                 if (i < row_size-1)
                     cmd_num_format += ",";
             }
-            cmd_num_format += "]";
+            if (temp.compareTo("matrix") == 0)
+                cmd_num_format += "]";
             
             System.out.println("Input range of values at each index (ex: \"(0,100]\").");
             temp = scanner.nextLine();
@@ -333,7 +356,7 @@ class LeetCodeTestCaseGenerator
 
         while (true)
         {
-            System.out.print("Hit enter to regenerate");
+            System.out.print("Hit enter to regenerate, or \"restart\" to restart this process");
             if (cmd_init.compareTo("matrix") != 0)
                 System.out.println(", or enter another amount (ex: 1000).");
             else
@@ -341,8 +364,13 @@ class LeetCodeTestCaseGenerator
                 
             String maybe_count = scanner.nextLine();
             if (maybe_count.compareTo("") != 0)
-                count = Integer.parseInt(maybe_count);
-
+            {
+                if (maybe_count.compareTo("restart") == 0)
+                    System.out.println("This does not work yet, stop with CTRL+C");
+                else
+                    count = Integer.parseInt(maybe_count);
+            }
+            
             System.out.println();
             generateTestCase(cmd_init, hashmap_cmds, list_just_nums, other_cmds, count);
         }
