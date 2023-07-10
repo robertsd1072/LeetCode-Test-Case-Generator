@@ -268,8 +268,11 @@ class Main
             
             list_just_nums.add(new CmdsStuff(cmd_nums, cmd_num_format, list_ranges));
         }
-        else if (temp.compareTo("") != 0)
+        else if (temp.compareTo("command") == 0)
         {
+            System.out.println("Input an initializing command (ex: \"LRUCache:[capacity]\").");
+            temp = scanner.nextLine();
+            
             cmd_init = "\""+temp.substring(0, temp.indexOf(":"))+"\"";
 
             String[] cmd_init_nums = temp.substring(temp.indexOf(":")+2, temp.length()-1).split(",");
