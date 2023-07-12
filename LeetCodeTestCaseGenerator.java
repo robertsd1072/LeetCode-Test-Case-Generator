@@ -15,6 +15,26 @@ class Main
             range = the_range;
         }
     }
+    
+    private static class Return
+    {
+        String cmd_init;
+        HashMap<String, CmdsStuff> hashmap_cmds;
+        ArrayList<CmdsStuff> list_just_nums;
+        ArrayList<String> other_cmds;
+        int count;
+        
+        public Return(String the_cmd_init, HashMap<String, CmdsStuff> the_hashmap_cmds
+                     ,ArrayList<CmdsStuff> the_list_just_nums, ArrayList<String> the_other_cmds
+                     ,int the_count)
+        {
+            cmd_init = the_cmd_init;
+            hashmap_cmds = the_hashmap_cmds;
+            list_just_nums = the_list_just_nums;
+            other_cmds = the_other_cmds;
+            count = the_count;
+        }
+    }
 
     private static Integer[] getRangeNum(String input, boolean is_char)
     {
@@ -183,11 +203,9 @@ class Main
             second_part += "]";
         System.out.println(second_part);
     }
-
-    public static void main(String[] args)
+    
+    private static Return getInput(Scanner scanner)
     {
-        Scanner scanner = new Scanner(System.in);
-
         System.out.println("Input one of the following:");
         System.out.println("    \"command\" if the testcase uses commands like \'get\' or \'set\'");
         System.out.println("    \"matrix\" if the testcase uses a matrix");
@@ -206,8 +224,9 @@ class Main
         if (temp.compareTo("matrix") == 0 || temp.compareTo("array") == 0)
         {
             cmd_init = "matrix";
+            String other_cmd_init = temp.compareTo("matrix") == 0 ? "matrix" : "array";
             
-            if (temp.compareTo("matrix") == 0)
+            if (other_cmd_init.compareTo("matrix") == 0)
             {
                 System.out.println("Input the size of the matrix (ex: \"20x100\").");
                 temp = scanner.nextLine();
@@ -225,7 +244,7 @@ class Main
             String[] cmd_nums = {"index"};
             String cmd_num_format = "";
             int row_size;
-            if (temp.compareTo("matrix") == 0)
+            if (other_cmd_init.compareTo("matrix") == 0)
             {
                 cmd_num_format = "[";
                 row_size = Integer.parseInt(temp.substring(0, temp.indexOf("x")));
@@ -239,7 +258,7 @@ class Main
                 if (i < row_size-1)
                     cmd_num_format += ",";
             }
-            if (temp.compareTo("matrix") == 0)
+            if (other_cmd_init.compareTo("matrix") == 0)
                 cmd_num_format += "]";
             
             System.out.println("Input range of values at each index (ex: \"(0,100]\").");
@@ -354,6 +373,21 @@ class Main
                 sorted = scanner.nextLine();
             }
         }
+        
+        return new Return(cmd_init, hashmap_cmds, list_just_nums, other_cmds, count);
+    }
+
+    public static void main(String[] args)
+    {
+        Scanner scanner = new Scanner(System.in);
+
+        Return the_return = getInput(scanner);
+        
+        String cmd_init = the_return.cmd_init;
+        HashMap<String, CmdsStuff> hashmap_cmds = the_return.hashmap_cmds;
+        ArrayList<CmdsStuff> list_just_nums = the_return.list_just_nums;
+        ArrayList<String> other_cmds = the_return.other_cmds;
+        int count = the_return.count;
 
         generateTestCase(cmd_init, hashmap_cmds, list_just_nums, other_cmds, count);
 
@@ -369,7 +403,15 @@ class Main
             if (maybe_count.compareTo("") != 0)
             {
                 if (maybe_count.compareTo("restart") == 0)
-                    System.out.println("This does not work yet, stop with CTRL+C");
+                {
+                    the_return = getInput(scanner);
+                    
+                    cmd_init = the_return.cmd_init;
+                    hashmap_cmds = the_return.hashmap_cmds;
+                    list_just_nums = the_return.list_just_nums;
+                    other_cmds = the_return.other_cmds;
+                    count = the_return.count;
+                }
                 else
                     count = Integer.parseInt(maybe_count);
             }
